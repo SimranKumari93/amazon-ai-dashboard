@@ -1,0 +1,79 @@
+You are given Reddit comment threads related to a specific post .
+
+Before Analysis strictly check if the post and comments mentions Amazon(R) or not. If you are very sure it is not related to Amazon then just return ***Not Sure If the post is related to Amazon*** " if it is related to Amazon then continue with the below analysis.
+
+Analyze the comments and generate a structure in the exact format shown below.
+
+
+⚠️ Guidelines:
+- Don't make any assumptions and just give data from the comments provided nothing extra.
+- Sections 1, 2, 3, and 6 should be strictly focused on **Amazon**.
+- Section 4 (**Comparisons**) can mention any retailer, even if Amazon is not explicitly referenced.
+- Section 5 (**Basic Summary**) should only cover Amazon-related content.
+
+Format to follow:
+
+---
+
+1) **Overall Sentiment**  
+State the overall sentiment toward **Amazon**: *positive*, *negative*, or *neutral*, along with a confidence score (e.g., negative - 78%).
+
+2) **Categories of Comments**  
+Group user comments **about Amazon only and leave comparisons with other retailers for this section ** summarize them and organize by:
+- Based on cost (strictly consider those comments that mention cost, price, offers, discounts or value of Amazon products)
+- Based on delivery (consider those comments that mention speed/time, delays or anything related to shipping or delivery)  
+- Availability (strictly consider those comments mentioning stock availability or lack thereof)
+- Amazon team member comments (strictly consider those comments that look like it is from a Amazon team member or employee)
+- Other categories (If a comment does not fit into the above categories then it should be placed here and here also we will divide the comments based on sentiment(positive, negative, neutral))
+Under each category divide the comments based on sentiment (positive, negative, neutral) and provide a summary of the comments.
+support all the summaries with all the comments that were used to generate the summary, if for a particular category like Based on delivery there are no comments then say no comments 
+The output should stick to the below format and the content should be fully derived from the reddit post itself. This is just a sample format.
+'**Based on delivery (speed/time):**  
+	Positive - Summary of positive comments around this category
+		+ Example of positive comments [User id of commentor], we can have multiple comments here, listed in points.
+	Negative - Summary of negative comments around this category
+	    + Example of negative comments [User id of commentor], we can have multiple comments here, listed in points.
+	This format can be used for all the categories mentioned in the comments.
+'
+
+3) **Valuable Feedbacks**  (this is a very critical section so please don't make any assumptions and just give data from the comments provided nothing extra)
+List specific suggestions where users mention **what could improve Amazon's experience** or hoped for cases where Amazon could have certain features that would improve guest experience.  
+For each feedback, include:  
+- A **summary** of the insight  
+- All **verbatim user comments** that led to this insight along with the user_name who commented it in the square brackets.
+
+4) **Comparisons**  
+Include any comments mentioning other retailers (e.g., Walmart, Costco, Amazon, Best Buy) — whether or not they are compared to Amazon. For each:
+- Name of the retailer and number of comments considered (both positive and negative)
+- What was said  
+- Sentiment of the mention (positive/negative/neutral)
+- All **verbatim user comments** that led to this insight along with the user_name who commented it in square brackets
+  The output should be in the below format and the content should be fully derived from the reddit post itself. This is just a sample format. -
+  '**Comparisons**:
+	* **Walmart**: (total number of comments) comments ((number of positive comments) positive, (number of negative comments) negative)
+	Positive - Summary of positive comments.
+		+ Example of positive comments [User id of commentor], we can have multiple comments here, listed in points.
+	Negative - Summary of negative comments.
+	    + Example of negative comments [User id of commentor], we can have multiple comments here, listed in points.
+	This format can be used for all the retailers mentioned in the comments.
+	'
+
+5) **Basic Summary**  
+Write a concise 5-8 sentence summary capturing the **main themes and insights about Amazon** from the discussion.
+
+6) **Number of Unique User Comments Considered**  
+Give the total count of distinct **Amazon-related** user comments used to generate this output.
+
+
+
+***Not Sure If the post is related to Amazon or Circle Week***
+
+✅ If the post is related to **Amazon's Circle Week**, analyze the comments and provide insights using the exact structure below.
+
+⚠️ Guidelines:
+- Use only the information found in the comments. No assumptions or outside knowledge.
+- Be concise but include all meaningful detail tied to the relevant metric.
+- For each section, if there are no relevant comments, say: "No comments found."
+- Support every insight with actual Reddit comments (with usernames in square brackets).
+
+---

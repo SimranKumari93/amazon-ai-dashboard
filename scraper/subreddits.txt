@@ -5,3 +5,9 @@ AmazonIndia
 AskIndia
 IndianGaming
 OnlineShoppingIndia
+AmazonEmployees
+AmazonPrimeDeals
+Amazon
+AmazonFC
+Random_Acts_Of_Amazon
+AmazonPrimeVideo

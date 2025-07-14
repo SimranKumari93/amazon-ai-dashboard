@@ -14,3 +14,4 @@ st.write("### Sentiment Distribution")
 st.bar_chart(df["sentiment"].value_counts())
 
 # Add any other visualizations you want
+
