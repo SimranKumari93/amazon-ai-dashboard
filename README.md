@@ -1,65 +1,120 @@
-Amazon Sale Sentiment Analysis & LLM Training Pipeline
-Project Overview
-This project automates the collection, cleaning, and sentiment analysis of Reddit discussions related to Amazon sales. It is designed to extract customer
-opinions in real time, identify trending products, and prepare structured datasets for training a custom language model (LLM) focused on e-commerce 
-discussions.
+# Amazon Sale Sentiment Analysis & LLM Training Pipeline
 
-Problem Statement
-Large-scale e-commerce events, such as Amazon sales, generate thousands of customer comments daily across online forums. Manually tracking and analyzing
-these insights is inefficient and prone to error. This project addresses the challenge by:
+## 📌 Project Overview
 
-Automating data collection from relevant Reddit threads.
+This project automates the **collection, cleaning, and sentiment analysis** of Reddit discussions related to **Amazon sales**.
+It extracts customer opinions, identifies trending products, and prepares structured datasets for **training a custom LLM** specialized in e-commerce discussions.
 
-Cleaning and filtering the data for better usability.
+---
 
-Applying sentiment analysis to gauge public opinion.
+## 🎯 Problem Statement
 
-Producing a ready-to-train dataset for fine-tuning LLMs on retail-specific language.
+Large-scale e-commerce events (e.g., Amazon Great Indian Festival, Prime Day) generate **thousands of customer comments** daily on online forums.
+Manually tracking and analyzing them is **slow and error-prone**.
 
-Features
-Automated scraping of Amazon sale–related posts and comments from Reddit using PRAW API.
+This project solves that problem by:
 
-Text cleaning and keyword-based filtering for relevance.
+* Automating Reddit data collection from sale-related discussions.
+* Cleaning and filtering data for **only relevant insights**.
+* Applying **AI sentiment analysis** to gauge public opinion.
+* Producing datasets ready for **LLM fine-tuning** in retail-specific contexts.
 
-AI-powered sentiment analysis of customer feedback.
+---
 
-Storage of both raw and processed datasets in CSV format.
+## 🚀 Features
 
-Data preparation for LLM training.
+* Automatic Reddit comment scraping via **PRAW API**.
+* Text cleaning & relevance filtering.
+* AI-powered **sentiment classification**.
+* Raw and processed data saved in CSV format.
+* Ready-to-train datasets for custom LLMs.
 
-Project Structure
+---
+
+## 📂 Project Structure
+
+```
 project-root/
 │
 ├── data/
-│   ├── raw/                # Raw Reddit comments from scraping
-│   └── processed/          # Cleaned and sentiment-tagged data
+│   ├── raw/                # Raw Reddit comments
+│   └── processed/          # Cleaned + sentiment-tagged data
 │
 ├── scraper/
-│   ├── reddit_scraper.py   # Step 1: Reddit data scraping script
-│   ├── subreddits.txt      # List of target subreddits
+│   ├── reddit_scraper.py   # Step 1: Data scraping
+│   ├── subreddits.txt      # Target subreddits list
 │
 ├── processor/
-│   ├── sentiment_cleaner.py # Step 2: Data cleaning and sentiment processing
-│   ├── utils.py             # Helper functions for text cleaning and prompts
+│   ├── sentiment_cleaner.py # Step 2: Cleaning + Sentiment
+│   ├── utils.py             # Helper functions
 │
 ├── .env                     # Reddit API credentials
-├── requirements.txt         # Python dependencies
-└── README.md                # Project documentation
-Workflow
-Scraping – Collects posts and comments from relevant subreddits using PRAW API and stores them in data/raw/.
+├── requirements.txt         # Dependencies
+└── README.md                # Documentation
+```
 
-Processing – Cleans the text, removes unwanted content, applies keyword-based filtering, and runs sentiment analysis through an AI model.
+---
 
-Output – Saves processed, sentiment-tagged data to data/processed/, ready for LLM fine-tuning or analysis.
+## 🔄 Workflow
 
-Here is the notion link for a better understanding of the bugs I fixed, dependencies installed, API used (how it was created, like PRAW), resources used also 
-the next enhancements in my project Link: https://www.notion.so/chatbot-lab-228cccd15a1a800a857df5346d4fe3d3  
+1. **Scraping** → Collect Reddit posts & comments from target subreddits.
+2. **Processing** → Clean, filter, and analyze sentiment.
+3. **Output** → Store final dataset in `data/processed/` for LLM training.
 
-Real-World Applications
-Market research for e-commerce trends.
+---
 
-Tracking customer sentiment during major sales events.
+## 📦 Dependencies
 
-Building domain-specific chatbots for retail.
+* Python 3.8+
+* PRAW (Reddit API wrapper)
+* Pandas (Data processing)
+* Requests (API calls)
+* Streamlit *(optional, for dashboard)*
 
-You can reach out to me if you find any difficulty in this repo 
+Install all with:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🌐 APIs Used
+
+* **Reddit API** (via PRAW) – Fetch posts/comments.
+* **Custom AI API** – Sentiment classification.
+---
+
+## 🐞 Known Issues
+
+* “No comments found” if keywords are missing in posts.
+* API rate limits may interrupt long scrapes.
+* Sarcasm/mixed sentiment can cause misclassification.
+---
+
+## 📚 Resources
+
+* [PRAW Docs](https://praw.readthedocs.io/)
+* [Reddit API Reference](https://www.reddit.com/dev/api/)
+* [Pandas Docs](https://pandas.pydata.org/)
+* [Requests Docs](https://requests.readthedocs.io/)
+
+---
+
+## 💡 Real-World Applications
+
+* **Market research** for e-commerce trends.
+* Tracking **customer sentiment** during big sales.
+* Building **domain-specific chatbots** for retail.
+
+---
+
+## 🔮 Next Enhancements
+
+* Multi-platform scraping (Flipkart, Twitter/X, etc.).
+* Transformer-based **advanced sentiment models**.
+* Real-time dashboard visualizations.
+* Automated keyword/topic extraction.
+* Async scraping for speed & rate-limit handling.
+
+---
