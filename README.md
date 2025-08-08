@@ -9,8 +9,7 @@ It extracts customer opinions, identifies trending products, and prepares struct
 
 ## Problem Statement
 
-Large-scale e-commerce events (e.g., Amazon Great Indian Festival, Prime Day) generate **thousands of customer comments** daily on online forums.
-Manually tracking and analyzing them is **slow and error-prone**.
+To develop a dashboard powered by an AI language model that provides actionable insights from Reddit comments about products sold during specific Amazon.in sales events. By scraping sale-specific Reddit discussions, the system will classify sentiment, extract user feedback, and recommend improvements to enhance product quality, increase customer satisfaction, and boost future sales performance.
 
 This project solves that problem by:
 
@@ -87,11 +86,11 @@ pip install -r requirements.txt
 * Sarcasm/mixed sentiment can cause misclassification.
 ---
 
-## Real-World Applications
+## Real-World Use Case
 
-* **Market research** for e-commerce trends.
-* Tracking **customer sentiment** during big sales.
-* Building **domain-specific chatbots** for retail.
+* Sellers understand how their products were received.
+* Buyers see unbiased community feedback before next sales.
+* Analysts get market trends and sentiment from organic sources.
 
 ---
 Feel free to reach out to simrankumaribodhgaya93@gmail.com if you have any queries 
