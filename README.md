@@ -64,8 +64,8 @@ project-root/
 ---
 
 ## Here is the notion
-link : https://www.notion.so/chatbot-lab-228cccd15a1a800a857df5346d4fe3d3
-
+link: https://www.notion.so/chatbot-lab-228cccd15a1a800a857df5346d4fe3d3
+In this template, I have added all the bugs that I got during this project and how I resolved them. Each and every step is written, also what the dependencies, resources, and APIs.
 Install all with:
 
 ```bash
@@ -103,13 +103,4 @@ pip install -r requirements.txt
 * Building **domain-specific chatbots** for retail.
 
 ---
-
-## Next Enhancements
-
-* Multi-platform scraping (Flipkart, Twitter/X, etc.).
-* Transformer-based **advanced sentiment models**.
-* Real-time dashboard visualizations.
-* Automated keyword/topic extraction.
-* Async scraping for speed & rate-limit handling.
-
----
+Feel free to reach out to simrankumaribodhgaya93@gmail.com if you have any queries 
