@@ -63,13 +63,7 @@ project-root/
 
 ---
 
-## Dependencies
-
-* Python 3.8+
-* PRAW (Reddit API wrapper)
-* Pandas (Data processing)
-* Requests (API calls)
-* Streamlit *(optional, for dashboard)*
+## Here is the notion link : https://www.notion.so/chatbot-lab-228cccd15a1a800a857df5346d4fe3d3
 
 Install all with:
 
