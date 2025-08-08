@@ -66,12 +66,12 @@ project-root/
 ## Here is the notion
 link: https://www.notion.so/chatbot-lab-228cccd15a1a800a857df5346d4fe3d3
 In this template, I have added all the bugs that I got during this project and how I resolved them. Each and every step is written, also what the dependencies, resources, and APIs.
+
 Install all with:
 
 ```bash
 pip install -r requirements.txt
 ```
-
 ---
 
 ## APIs Used
