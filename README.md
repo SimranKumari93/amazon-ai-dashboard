@@ -63,7 +63,8 @@ project-root/
 
 ---
 
-## Here is the notion link : https://www.notion.so/chatbot-lab-228cccd15a1a800a857df5346d4fe3d3
+## Here is the notion
+link : https://www.notion.so/chatbot-lab-228cccd15a1a800a857df5346d4fe3d3
 
 Install all with:
 
