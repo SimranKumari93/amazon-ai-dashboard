@@ -87,15 +87,6 @@ pip install -r requirements.txt
 * Sarcasm/mixed sentiment can cause misclassification.
 ---
 
-## Resources
-
-* [PRAW Docs](https://praw.readthedocs.io/)
-* [Reddit API Reference](https://www.reddit.com/dev/api/)
-* [Pandas Docs](https://pandas.pydata.org/)
-* [Requests Docs](https://requests.readthedocs.io/)
-
----
-
 ## Real-World Applications
 
 * **Market research** for e-commerce trends.
