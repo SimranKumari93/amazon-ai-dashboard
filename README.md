@@ -1,13 +1,13 @@
 # Amazon Sale Sentiment Analysis & LLM Training Pipeline
 
-## 📌 Project Overview
+## Project Overview
 
 This project automates the **collection, cleaning, and sentiment analysis** of Reddit discussions related to **Amazon sales**.
 It extracts customer opinions, identifies trending products, and prepares structured datasets for **training a custom LLM** specialized in e-commerce discussions.
 
 ---
 
-## 🎯 Problem Statement
+## Problem Statement
 
 Large-scale e-commerce events (e.g., Amazon Great Indian Festival, Prime Day) generate **thousands of customer comments** daily on online forums.
 Manually tracking and analyzing them is **slow and error-prone**.
@@ -21,7 +21,7 @@ This project solves that problem by:
 
 ---
 
-## 🚀 Features
+## Features
 
 * Automatic Reddit comment scraping via **PRAW API**.
 * Text cleaning & relevance filtering.
@@ -31,7 +31,7 @@ This project solves that problem by:
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 project-root/
@@ -55,7 +55,7 @@ project-root/
 
 ---
 
-## 🔄 Workflow
+## Workflow
 
 1. **Scraping** → Collect Reddit posts & comments from target subreddits.
 2. **Processing** → Clean, filter, and analyze sentiment.
@@ -63,7 +63,7 @@ project-root/
 
 ---
 
-## 📦 Dependencies
+## Dependencies
 
 * Python 3.8+
 * PRAW (Reddit API wrapper)
@@ -79,20 +79,20 @@ pip install -r requirements.txt
 
 ---
 
-## 🌐 APIs Used
+## APIs Used
 
 * **Reddit API** (via PRAW) – Fetch posts/comments.
 * **Custom AI API** – Sentiment classification.
 ---
 
-## 🐞 Known Issues
+## Known Issues
 
 * “No comments found” if keywords are missing in posts.
 * API rate limits may interrupt long scrapes.
 * Sarcasm/mixed sentiment can cause misclassification.
 ---
 
-## 📚 Resources
+## Resources
 
 * [PRAW Docs](https://praw.readthedocs.io/)
 * [Reddit API Reference](https://www.reddit.com/dev/api/)
@@ -101,7 +101,7 @@ pip install -r requirements.txt
 
 ---
 
-## 💡 Real-World Applications
+## Real-World Applications
 
 * **Market research** for e-commerce trends.
 * Tracking **customer sentiment** during big sales.
@@ -109,7 +109,7 @@ pip install -r requirements.txt
 
 ---
 
-## 🔮 Next Enhancements
+## Next Enhancements
 
 * Multi-platform scraping (Flipkart, Twitter/X, etc.).
 * Transformer-based **advanced sentiment models**.
