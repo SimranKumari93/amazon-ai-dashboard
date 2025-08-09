@@ -23,6 +23,9 @@ This project solves that problem by:
 * AI-powered **sentiment classification**.
 * Raw and processed data saved in CSV format.
 * Ready-to-train datasets for custom LLMs.
+  
+# Presentation 
+link: https://docs.google.com/presentation/d/1pmHfSVlQD25mpAz2f6SDM9ptSXUlhPtQiiX0yHplzQU/edit?usp=sharing
 
 ## Project Structure
 
@@ -54,7 +57,7 @@ project-root/
 
 ## Here is the notion
 link: https://www.notion.so/chatbot-lab-228cccd15a1a800a857df5346d4fe3d3
-In this template, I have added all the bugs that I got during this project and how I resolved them. Each and every step is written, also what the dependencies, resources, and APIs.
+In this template, I have listed all the bugs I encountered during this project and how I resolved them. Each step is written, including the dependencies, resources, and APIs.
 
 Install all with:
 
@@ -76,7 +79,7 @@ pip install -r requirements.txt
 ## Real-World Use Case
 
 * Sellers understand how their products were received.
-* Buyers see unbiased community feedback before next sales.
+* Buyers see unbiased community feedback before the next sales.
 * Analysts get market trends and sentiment from organic sources.
 
 Feel free to reach out to simrankumaribodhgaya93@gmail.com if you have any queries 
