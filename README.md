@@ -5,8 +5,6 @@
 This project automates the **collection, cleaning, and sentiment analysis** of Reddit discussions related to **Amazon sales**.
 It extracts customer opinions, identifies trending products, and prepares structured datasets for **training a custom LLM** specialized in e-commerce discussions.
 
----
-
 ## Problem Statement
 
 To develop a dashboard powered by an AI language model that provides actionable insights from Reddit comments about products sold during specific Amazon.in sales events. By scraping sale-specific Reddit discussions, the system will classify sentiment, extract user feedback, and recommend improvements to enhance product quality, increase customer satisfaction, and boost future sales performance.
