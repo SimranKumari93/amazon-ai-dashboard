@@ -46,8 +46,6 @@ project-root/
 └── README.md                # Documentation
 ```
 
----
-
 ## Workflow
 
 1. **Scraping** → Collect Reddit posts & comments from target subreddits.
