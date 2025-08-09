@@ -16,8 +16,6 @@ This project solves that problem by:
 * Applying **AI sentiment analysis** to gauge public opinion.
 * Producing datasets ready for **LLM fine-tuning** in retail-specific contexts.
 
----
-
 ## Features
 
 * Automatic Reddit comment scraping via **PRAW API**.
@@ -25,8 +23,6 @@ This project solves that problem by:
 * AI-powered **sentiment classification**.
 * Raw and processed data saved in CSV format.
 * Ready-to-train datasets for custom LLMs.
-
----
 
 ## Project Structure
 
@@ -58,8 +54,6 @@ project-root/
 2. **Processing** → Clean, filter, and analyze sentiment.
 3. **Output** → Store final dataset in `data/processed/` for LLM training.
 
----
-
 ## Here is the notion
 link: https://www.notion.so/chatbot-lab-228cccd15a1a800a857df5346d4fe3d3
 In this template, I have added all the bugs that I got during this project and how I resolved them. Each and every step is written, also what the dependencies, resources, and APIs.
@@ -69,20 +63,17 @@ Install all with:
 ```bash
 pip install -r requirements.txt
 ```
----
 
 ## APIs Used
 
 * **Reddit API** (via PRAW) – Fetch posts/comments.
 * **Custom AI API** – Sentiment classification.
----
-
+  
 ## Known Issues
 
 * “No comments found” if keywords are missing in posts.
 * API rate limits may interrupt long scrapes.
 * Sarcasm/mixed sentiment can cause misclassification.
----
 
 ## Real-World Use Case
 
@@ -90,5 +81,4 @@ pip install -r requirements.txt
 * Buyers see unbiased community feedback before next sales.
 * Analysts get market trends and sentiment from organic sources.
 
----
 Feel free to reach out to simrankumaribodhgaya93@gmail.com if you have any queries 
