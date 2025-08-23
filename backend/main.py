@@ -1,14 +1,18 @@
-import os, json
+import os, json, uvicorn
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import pandas as pd
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(
+    api_key="GEMINI_API_KEY",
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+)
+# openai.api_key = os.getenv("OPENAI_API_KEY")
 
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 
@@ -122,13 +126,17 @@ Keep it concise and bullet-based. Comments:\n{joined}
 
     try:
         # OpenAI chat completion
-        resp = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        resp = client.chat.completions.create(
+            model="gemini-2.0-flash",
             messages=[{"role":"user","content": prompt}],
-            temperature=0.2
+            # temperature=0.2
         )
-        text = resp.choices[0].message.content.strip()
+        
+        text = resp.choices[0].message  #resp.choices[0].message.content.strip()
     except Exception as e:
         raise HTTPException(500, detail=f"OpenAI error: {e}")
 
     return {"slug": req.slug, "summary": text}
+
+if __name__ == "__main__":
+   uvicorn.run(app, host="0.0.0.0", port=8000)
