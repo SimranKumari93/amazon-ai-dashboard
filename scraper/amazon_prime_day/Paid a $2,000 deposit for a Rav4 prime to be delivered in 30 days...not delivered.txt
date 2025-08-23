@@ -1,0 +1,6 @@
+Paid a $2,000 deposit for a Rav4 prime to be delivered in 30 days...not delivered
+
+https://redd.it/1mgxkty
+
+🔍 Refined Summary #1:
+(error calling LLM: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************pIsA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}})
