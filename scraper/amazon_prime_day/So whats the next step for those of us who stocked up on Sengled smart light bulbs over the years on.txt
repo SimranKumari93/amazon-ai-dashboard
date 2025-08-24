@@ -1,6 +1,0 @@
-So whats the next step for those of us who stocked up on Sengled smart light bulbs over the years on prime day?
-
-https://redd.it/1mirc2t
-
-🔍 Refined Summary #1:
-(error calling LLM: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************pIsA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}})

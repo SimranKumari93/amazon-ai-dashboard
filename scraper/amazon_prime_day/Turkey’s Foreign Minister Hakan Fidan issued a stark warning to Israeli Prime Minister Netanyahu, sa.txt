@@ -1,6 +1,0 @@
-Turkey’s Foreign Minister Hakan Fidan issued a stark warning to Israeli Prime Minister Netanyahu, saying he “will see that the blood of the people he doomed to starvation, killed, and deliberately targeted every day by snipers with fixed quotas for his pleasure will drown him."
-
-https://redd.it/1mmrg9p
-
-🔍 Refined Summary #1:
-(error calling LLM: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************pIsA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}})

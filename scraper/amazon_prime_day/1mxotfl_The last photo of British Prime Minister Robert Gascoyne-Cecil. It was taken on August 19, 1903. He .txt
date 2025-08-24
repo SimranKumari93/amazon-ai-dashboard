@@ -1,6 +1,0 @@
-The last photo of British Prime Minister Robert Gascoyne-Cecil. It was taken on August 19, 1903. He would die 3 days later due to Internal Bleeding, Breathing Problems, Heart Disease, Sepsis, Leg Ulcer, and Pulmonary Embolism at the age of 73.
-
-https://redd.it/1mxotfl
-
-🔍 Refined Summary #1:
-(error calling LLM: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************pIsA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}})

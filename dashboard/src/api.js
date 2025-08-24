@@ -1,29 +1,68 @@
-const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
-export async function fetchEvents() {
-  const r = await fetch(`${API}/events`);
-  if (!r.ok) throw new Error("Failed to load events");
-  return r.json();
+// Utility function to handle API responses
+async function handleResponse(response) {
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+  
+  const data = await response.json();
+  return data.success ? data.data : data;
 }
 
-export async function fetchSentiment(slug) {
-  const r = await fetch(`${API}/sentiment?slug=${encodeURIComponent(slug)}`);
-  if (!r.ok) throw new Error("No sentiment for this event");
-  return r.json();
+// Get all sale events
+export async function fetchSaleEvents() {
+  const response = await fetch(`${API_BASE}/sale-events`);
+  return handleResponse(response);
 }
 
-export async function fetchComments(slug, limit=200, offset=0) {
-  const r = await fetch(`${API}/comments?slug=${encodeURIComponent(slug)}&limit=${limit}&offset=${offset}`);
-  if (!r.ok) throw new Error("Failed to load comments");
-  return r.json();
+// Get all subreddits
+export async function fetchSubreddits() {
+  const response = await fetch(`${API_BASE}/subreddits`);
+  return handleResponse(response);
 }
 
-export async function fetchInsights(slug, maxComments=200) {
-  const r = await fetch(`${API}/insights`, {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ slug, max_comments: maxComments })
+// Get comments with optional keyword filtering
+export async function fetchComments(limit = 100, offset = 0, keywords = null) {
+  let url = `${API_BASE}/comments?limit=${limit}&offset=${offset}`;
+  if (keywords) {
+    url += `&keywords=${encodeURIComponent(keywords)}`;
+  }
+  const response = await fetch(url);
+  return handleResponse(response);
+}
+
+// Get sentiment summary
+export async function fetchSentiment() {
+  const response = await fetch(`${API_BASE}/sentiment`);
+  return handleResponse(response);
+}
+
+// Scrape Reddit data
+export async function scrapeRedditData(keywords = null, maxPosts = 50, subreddits = null) {
+  const response = await fetch(`${API_BASE}/scrape`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ 
+      keywords: keywords,
+      max_posts: maxPosts, 
+      subreddits: subreddits 
+    }),
   });
-  if (!r.ok) throw new Error("Failed to generate insights");
-  return r.json();
+  return handleResponse(response);
+}
+
+// Generate insights
+export async function generateInsights(maxComments = 100) {
+  const response = await fetch(`${API_BASE}/insights`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ max_comments: maxComments }),
+  });
+  return handleResponse(response);
 }

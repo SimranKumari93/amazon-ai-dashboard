@@ -1,134 +1,234 @@
-import os, json
-from fastapi import FastAPI, HTTPException, Query
+import os
+import uvicorn
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
-import pandas as pd
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI
+
+from lib.utils import (
+    init_database, get_sale_events, get_subreddits, RedditScraper,
+    generate_keywords, get_comments, add_comments, get_sentiment_summary
+)
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
-FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+# Initialize OpenAI client for Gemini (optional for insights)
+client = None
+if os.getenv("GEMINI_API_KEY"):
+    client = OpenAI(
+        api_key=os.getenv("GEMINI_API_KEY"),
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+    )
 
-app = FastAPI(title="Amazon Sale AI Backend", version="1.0")
+# Pydantic models
+class ScrapeRequest(BaseModel):
+    keywords: Optional[List[str]] = None
+    max_posts: Optional[int] = 50
+    subreddits: Optional[List[str]] = None
 
+class InsightRequest(BaseModel):
+    max_comments: Optional[int] = 100
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    init_database()
+    yield
+    # Shutdown (if needed)
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="Amazon Sale AI Dashboard",
+    description="Simple API for Amazon sale sentiment analysis",
+    version="2.0.0",
+    lifespan=lifespan
+)
+
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_ORIGIN, "http://localhost:3000", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-DATA_RAW = "data/raw"
-DATA_PROCESSED = "data/processed"
-
-class InsightRequest(BaseModel):
-    slug: str
-    max_comments: int = 200
-
-def load_events():
-    path = os.path.join(DATA_RAW, "sale_events.json")
-    if not os.path.exists(path):
-        return []
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def slug_to_files(slug: str):
-    raw_csv = os.path.join(DATA_RAW, f"{slug}_reddit_comments.csv")
-    proc_csv = os.path.join(DATA_PROCESSED, f"{slug}_sentiment.csv")
-    return raw_csv, proc_csv
-
-# backend/main.py  # new code written to fix bugs
-from fastapi import FastAPI
-
-app = FastAPI()
+# API Endpoints
 
 @app.get("/")
 def root():
-    return {"message": "Amazon Sale AI Dashboard Backend Running!"}
+    """Health check endpoint"""
+    return {"message": "Amazon Sale AI Dashboard API v2.0 is running!"}
 
-@app.get("/events")
-def list_events():
-    events = load_events()
-    # if no slug in file, synthesize one
-    for e in events:
-        if "slug" not in e:
-            e["slug"] = "".join(c if c.isalnum() else "_" for c in e["name"].lower())
-    return events
+@app.get("/sale-events")
+def list_sale_events():
+    """Get all predefined sale events"""
+    try:
+        events = get_sale_events()
+        return {"success": True, "data": events}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching events: {str(e)}")
+
+@app.get("/subreddits")
+def list_subreddits():
+    """Get all configured subreddits"""
+    try:
+        subreddits = get_subreddits()
+        return {"success": True, "data": subreddits}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching subreddits: {str(e)}")
 
 @app.get("/comments")
-def get_comments(slug: str, limit: int = 200, offset: int = 0):
-    raw_csv, proc_csv = slug_to_files(slug)
-    csv_path = proc_csv if os.path.exists(proc_csv) else raw_csv
-    if not os.path.exists(csv_path):
-        raise HTTPException(404, detail=f"No data for slug '{slug}'")
-
-    df = pd.read_csv(csv_path)
-    # normalize expected columns
-    cols = [c.lower() for c in df.columns]
-    df.columns = cols
-    keep = [c for c in ["submission_title","comment","created_utc","subreddit","sentiment","url"] if c in df.columns]
-    if not keep:
-        keep = df.columns.tolist()
-
-    sliced = df[keep].fillna("").iloc[offset:offset+limit]
-    return {"total": len(df), "rows": sliced.to_dict(orient="records")}
+def get_all_comments(limit: int = 100, offset: int = 0, keywords: Optional[str] = None):
+    """Get comments from database with optional keyword filtering"""
+    try:
+        keyword_list = None
+        if keywords:
+            keyword_list = [k.strip() for k in keywords.split(",") if k.strip()]
+        
+        comments_data = get_comments(limit, offset, keyword_list)
+        return {"success": True, "data": comments_data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching comments: {str(e)}")
 
 @app.get("/sentiment")
-def sentiment_summary(slug: str):
-    _, proc_csv = slug_to_files(slug)
-    if not os.path.exists(proc_csv):
-        raise HTTPException(404, detail=f"Processed sentiment file not found for '{slug}'")
-    df = pd.read_csv(proc_csv)
-    if "sentiment" not in df.columns:
-        raise HTTPException(400, detail="sentiment column missing in processed file")
+def get_sentiment():
+    """Get sentiment analysis summary"""
+    try:
+        sentiment_data = get_sentiment_summary()
+        return {"success": True, "data": sentiment_data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching sentiment: {str(e)}")
 
-    total = len(df)
-    dist = df["sentiment"].str.strip().str.title().value_counts().to_dict()
-    top_titles = df["submission_title"].value_counts().head(10).to_dict() if "submission_title" in df.columns else {}
-    return {"total": total, "distribution": dist, "top_posts": top_titles}
+@app.post("/scrape")
+def scrape_reddit_data(request: ScrapeRequest, background_tasks: BackgroundTasks):
+    """Scrape Reddit data based on keywords"""
+    try:
+        # Use provided keywords or generate from query
+        keywords = request.keywords
+        if not keywords:
+            keywords = generate_keywords("prime day")  # Default keywords
+        
+        # Add scraping task to background
+        background_tasks.add_task(
+            scrape_reddit_task, 
+            keywords,
+            request.subreddits or get_subreddits(),
+            request.max_posts
+        )
+        
+        return {"success": True, "message": "Scraping started in background", "keywords": keywords}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error starting scrape: {str(e)}")
+
+@app.get("/scrape/status")
+def get_scrape_status():
+    """Get current database status"""
+    try:
+        comments_data = get_comments(1, 0)
+        return {
+            "success": True, 
+            "data": {
+                "total_comments": comments_data["total"],
+                "last_updated": "recent" if comments_data["total"] > 0 else "never"
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting status: {str(e)}")
 
 @app.post("/insights")
-def generate_insights(req: InsightRequest):
-    raw_csv, proc_csv = slug_to_files(req.slug)
-    csv_path = proc_csv if os.path.exists(proc_csv) else raw_csv
-    if not os.path.exists(csv_path):
-        raise HTTPException(404, detail=f"No data for slug '{req.slug}'")
-
-    df = pd.read_csv(csv_path).fillna("")
-    if "comment" not in df.columns:
-        # try lower-case fallback
-        if "comment" not in [c.lower() for c in df.columns]:
-            raise HTTPException(400, detail="No 'comment' column found")
-        df.columns = [c.lower() for c in df.columns]
-
-    # sample up to max_comments
-    sample = df.sample(min(req.max_comments, len(df)), random_state=42)
-    title_hint = sample["submission_title"].iloc[0] if "submission_title" in sample.columns and len(sample) else ""
-
-    joined = "\n".join(f"- {r['comment']}" for _, r in sample.iterrows())
-
-    prompt = f"""
-You are an analyst for Amazon sales events. Based ONLY on these Reddit comments, provide:
-1) Sentiment distribution (Positive/Negative/Neutral) with brief justification
-2) Top 5 pain points and actionable recommendations
-3) Top 5 delights and what to double down on
-4) Watch-outs for next sale (risks)
-Keep it concise and bullet-based. Comments:\n{joined}
-"""
-
+def generate_insights(request: InsightRequest):
+    """Generate AI insights from comments"""
     try:
-        # OpenAI chat completion
-        resp = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role":"user","content": prompt}],
-            temperature=0.2
-        )
-        text = resp.choices[0].message.content.strip()
-    except Exception as e:
-        raise HTTPException(500, detail=f"OpenAI error: {e}")
+        # Get comments for analysis
+        comments_data = get_comments(request.max_comments, 0)
+        if comments_data["total"] == 0:
+            raise HTTPException(status_code=400, detail="No comments available for analysis")
+        
+        # Prepare comments for AI analysis
+        comments_text = "\n".join([
+            f"- {comment['comment']}" 
+            for comment in comments_data["rows"] 
+            if comment["comment"]
+        ][:50])  # Limit to first 50 comments
+        
+        if not comments_text.strip():
+            raise HTTPException(status_code=400, detail="No valid comments found for analysis")
+        
+        if not client:
+            return {
+                "success": True, 
+                "data": {
+                    "insights": "AI insights unavailable. Please configure GEMINI_API_KEY in environment variables."
+                }
+            }
+        
+        # Create prompt for Gemini
+        prompt = f"""
+Analyze these Amazon sale-related Reddit comments and provide:
 
-    return {"slug": req.slug, "summary": text}
+1) **Sentiment Distribution**: Overall sentiment (Positive/Negative/Neutral) with percentages
+2) **Top 5 Pain Points**: Main customer complaints with actionable recommendations
+3) **Top 5 Delights**: What customers loved most
+4) **Key Recommendations**: Top 3 improvements for Amazon sales
+
+Keep the response concise and actionable.
+
+Comments:
+{comments_text}
+"""
+        
+        try:
+            response = client.chat.completions.create(
+                model="gemini-2.0-flash",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3
+            )
+            insights = response.choices[0].message.content.strip()
+        except Exception:
+            insights = "Failed to generate AI insights. Please check API configuration."
+        
+        return {"success": True, "data": {"insights": insights}}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating insights: {str(e)}")
+
+# Helper functions
+
+def scrape_reddit_task(keywords: List[str], subreddits: List[str], max_posts: int):
+    """Background task to scrape Reddit data"""
+    try:
+        print(f"Starting scrape task - Keywords: {keywords}, Subreddits: {len(subreddits)}, Max posts: {max_posts}")
+        scraper = RedditScraper()
+        
+        if scraper.test_connection():
+            print(f"✓ Reddit API connected. Scraping for keywords: {keywords}")
+            comments = scraper.scrape_posts_by_keywords(keywords, subreddits, max_posts)
+            print(f"✓ Scraping completed. Found {len(comments)} comments")
+        else:
+            print("✗ Reddit API not available, cannot scrape data")
+            return
+        
+        if comments:
+            add_comments(comments)
+            print(f"✓ Added {len(comments)} comments to database successfully")
+            
+            # Verify data was saved
+            from lib.utils import get_comments
+            total_in_db = get_comments(1, 0)["total"]
+            print(f"✓ Database now contains {total_in_db} total comments")
+        else:
+            print("⚠ No comments found for the given keywords")
+            
+    except Exception as e:
+        print(f"✗ Error in scraping task: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

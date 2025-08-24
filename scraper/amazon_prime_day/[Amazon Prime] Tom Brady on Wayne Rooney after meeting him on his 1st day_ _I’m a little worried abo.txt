@@ -1,6 +1,0 @@
-[Amazon Prime] Tom Brady on Wayne Rooney after meeting him on his 1st day: "I’m a little worried about our head coaches work ethic." Rooney got sacked from Birmingham after 83 days.
-
-https://redd.it/1mfepvd
-
-🔍 Refined Summary #1:
-(error calling LLM: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************pIsA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}})
