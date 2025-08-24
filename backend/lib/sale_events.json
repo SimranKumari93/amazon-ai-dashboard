@@ -1,38 +1,58 @@
 [
     {
-      "name": "Halloween Sale",
-      "slug": "halloween_sale",
-      "start_date": "2023-10-25",
-      "end_date": "2023-10-31"
+      "name": "Republic Day Sale",
+      "slug": "republic_day_sale",
+      "start_date": "2025-01-20",
+      "end_date": "2025-01-26",
+      "description": "Amazon's Republic Day sale featuring electronics, fashion, and home products"
+    },
+    {
+      "name": "Great Indian Festival",
+      "slug": "great_indian_festival",
+      "start_date": "2024-10-03",
+      "end_date": "2024-10-29",
+      "description": "Amazon's biggest sale event in India with massive discounts across categories"
+    },
+    {
+      "name": "Prime Day",
+      "slug": "prime_day",
+      "start_date": "2024-07-15",
+      "end_date": "2024-07-16",
+      "description": "Exclusive 48-hour sale for Amazon Prime members"
     },
     {
       "name": "Black Friday",
-       "slug": "black_friday",
-      "start_date": "2023-11-24",
-      "end_date": "2023-11-24"
+      "slug": "black_friday",
+      "start_date": "2024-11-29",
+      "end_date": "2024-11-29",
+      "description": "Black Friday deals and discounts"
     },
     {
       "name": "Cyber Monday",
-       "slug": "cyber_monday",
-      "start_date": "2023-11-27",
-      "end_date": "2023-11-27"
+      "slug": "cyber_monday",
+      "start_date": "2024-12-02",
+      "end_date": "2024-12-02",
+      "description": "Online deals and tech discounts"
     },
     {
       "name": "Christmas Sale",
-       "slug": "christmas_sale",
-      "start_date": "2023-12-20",
-      "end_date": "2023-12-26"
+      "slug": "christmas_sale",
+      "start_date": "2024-12-20",
+      "end_date": "2024-12-26",
+      "description": "Christmas and holiday season sale"
     },
     {
       "name": "New Year Sale",
-       "slug": "new_year_sale",
-      "start_date": "2023-12-27",
-      "end_date": "2024-01-02"
+      "slug": "new_year_sale",
+      "start_date": "2024-12-27",
+      "end_date": "2025-01-02",
+      "description": "New Year sale with fresh deals and discounts"
     },
     {
-      "name": "Easter Sale",
-       "slug": "easter_sale",
-      "start_date": "2024-03-24",
-      "end_date": "2024-03-31"
+      "name": "Summer Sale",
+      "slug": "summer_sale",
+      "start_date": "2025-05-01",
+      "end_date": "2025-05-31",
+      "description": "Summer season sale featuring electronics, fashion, and home appliances"
     }
   ]

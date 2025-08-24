@@ -1,79 +1,159 @@
-# Building an AI-Powered Dashboard for Sentiment Analysis of Amazon.in Sale Event Products Using Reddit Feedback
+# Amazon Sale AI Dashboard
 
-## Problem Statement
+## 🎯 Overview
 
-To develop a dashboard powered by an AI language model that provides actionable insights from Reddit comments about products sold during specific Amazon.in sale events. By scraping sale-specific Reddit discussions, the system will classify sentiment, extract user feedback, and recommend improvements to enhance product quality, increase customer satisfaction, and boost future sales performance.
+AI-powered sentiment analysis dashboard that scrapes Reddit discussions about Amazon sales and provides comprehensive insights using Gemini AI.
 
-## 🔧 PHASE 1: Define Scope & Requirements
+## ✨ Features
 
-### Identify Target Sale Events
-- **Example:** "Amazon Fab TV Sale (June 1–10)"
-- Note sale names, dates, and product categories
+- **Reddit Scraping**: Multi-subreddit data collection with smart filtering
+- **AI Sentiment Analysis**: Real-time sentiment analysis using Gemini AI
+- **Comprehensive Insights**: Detailed AI-generated recommendations and analysis
+- **Clean UI**: Responsive design with inline styles (no external CSS dependencies)
+- **Smart Caching**: Processed events load instantly, with refresh options
 
-### Define Product List per Sale
-- Use Amazon's official sale pages (manually or via web scraping) to get products sold during each event
+## 🔄 Workflow
 
-## 📥 PHASE 2: Data Collection
+1. **Comments Section** (First) - Scraped Reddit discussions with pagination and filtering
+2. **Sentiment Distribution** (Second) - AI-analyzed sentiment charts and breakdowns  
+3. **AI Insights** (Third) - Comprehensive Gemini AI analysis with actionable recommendations
 
-### Reddit Data Scraping (PRAW)
-- Use **PRAW** to scrape posts and comments from subreddits like:
-  - r/IndianGaming
-  - r/IndiaDeals
-  - r/AmazonIndia
-  - r/AskIndia, etc.
+## 🚀 Quick Start
 
-- Filter posts/comments by:
-  - Sale dates (e.g., June 1–10)
-  - Keywords: ["Amazon", "Fab TV Sale", product names, etc.]
+### Prerequisites
+- Python 3.8+ with pip
+- Node.js 16+ with npm
+- Reddit API credentials ([Get here](https://www.reddit.com/prefs/apps))
+- Gemini API key ([Get here](https://aistudio.google.com/))
 
-### Store Raw Data
-- Save scraped data into a database or CSV (include timestamp, username, comment body, post title, subreddit, etc.)
+### Setup
 
-## 🧠 PHASE 3: Preprocess & Clean the Data
+1. **Clone and navigate:**
+   ```bash
+   cd amazon-ai-dashboard
+   ```
 
-### Data Cleaning (Python)
-- Remove spam, bot comments, emojis, URLs, non-English comments
-- Normalize text (lowercase, punctuation removal, etc.)
+2. **Install dependencies:**
+   ```bash
+   cd backend && pip install -r requirements.txt
+   cd ../dashboard && npm install
+   ```
 
-### Label or Annotate Sentiment (Optional)
-- If training your own model: Use tools like Prodigy or label manually
-- Or skip if using OpenAI/Gemini API for zero-shot/few-shot classification
+3. **Configure environment:**
+   Create `.env` file in `backend/` directory:
+   ```env
+   REDDIT_CLIENT_ID=your_reddit_client_id
+   REDDIT_CLIENT_SECRET=your_reddit_client_secret
+   REDDIT_USER_AGENT=AmazonDashboard/2.0
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
 
-## 🤖 PHASE 4: AI/LLM Integration
+4. **Start the system:**
+   ```bash
+   ./start.sh
+   ```
 
-### Using OpenAI for Sentiment & Insight Extraction
-- Use **Chat Completion API** via Python or curl to:
-  - Classify sentiment (positive/negative/neutral)
-  - Extract complaints/suggestions/praise
-  - Tag product names and issues (e.g., "Remote not working", "Delivery delay")
+### Manual Start
+```bash
+# Backend
+cd backend && PYTHONPATH=. python3 main.py
 
-### Example Prompt (for ChatGPT API):
-*[Note: The specific prompt example would be included in the original presentation but isn't fully visible in the provided content]*
+# Frontend  
+cd dashboard && VITE_API_BASE=http://localhost:8000 npm run dev
+```
 
-## 📊 PHASE 5: Dashboard Development
+## 🏗️ Architecture
 
-### Backend (Python FastAPI)
-- Serve processed data (JSON API with product names, sentiments, feedback, suggestions)
+### Backend (FastAPI)
+- `main.py` - API server with workflow endpoints
+- `lib/utils.py` - Core functionality with sentiment analysis
+- **Database**: SQLite with event processing state tracking
+- **APIs**: RESTful endpoints for event management and processing
 
-### Frontend (React.js or Dash/Streamlit)
-Build visual dashboard with:
-- Sentiment trends per product
-- Common complaints/praises (word cloud, tags)
-- Suggested improvements
-- Filter by product, date, sentiment, category
+### Frontend (React + Vanilla CSS)
+- `App.jsx` - Single-file architecture with all components
+- **Styling**: Pure inline styles (no Tailwind or external CSS)
+- **Components**: EventSelector, CommentsSection, SentimentSection, InsightsSection
 
-## Example Reddit Discussion Links
+## 📊 Usage
 
-Here are some example Reddit discussions related to Amazon sales that could be used for data collection:
+### First Time Processing:
+1. Select an event from dropdown (shows "○" = not processed)
+2. Enter keywords (e.g., "amazon prime day, amazon deals")
+3. Click "Process Event"
+4. Wait 2-5 minutes for complete analysis
+5. View results: Comments → Sentiment → Insights
 
-1. [Great savings on Amazon Republic Day sale](https://www.reddit.com/r/indiasocial/comments/198x3cd/great_savings_on_amazon_republic_day_sale/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
+### Returning User:
+1. Select a processed event (shows "✓" = processed)
+2. Instantly view cached results
+3. Use "Refresh Data" to reprocess with new data
 
-2. [Great India Sale by Amazon](https://www.reddit.com/r/IndiaTech/comments/1fkjcp7/great_india_sale_by_amazon/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
+## 🎯 Configuration
 
-3. [Is Amazon fooling us with Republic Day sale?](https://www.reddit.com/r/IndiaPS5/comments/1hzugqr/is_amazon_fooling_us_with_republic_day_sale/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
+### Sale Events
+Edit `backend/lib/sale_events.json`:
+```json
+{
+  "name": "Republic Day Sale",
+  "slug": "republic_day_sale", 
+  "start_date": "2025-01-20",
+  "end_date": "2025-01-26",
+  "description": "Amazon's Republic Day sale"
+}
+```
 
-4. [Best gaming laptops to buy during the Republic Day sale](https://www.reddit.com/r/IndianGaming/comments/195ml77/best_gaming_laptops_to_buy_during_the_republic/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
+### Subreddits
+Edit `backend/lib/subreddits.txt`:
+```
+IndiaDeals
+AmazonIndia
+IndianGaming
+```
 
-5. [How does Amazon pay insane joining bonus?](https://www.reddit.com/r/developersIndia/comments/1atae2b/how_does_amazon_pay_insane_joining_bonus/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
+## 🛠️ Development
 
-***
+### API Endpoints
+- `GET /events` - List all events with processing status
+- `GET /events/{slug}` - Get detailed event data  
+- `POST /events/{slug}/process` - Process event (scrape + analyze + insights)
+- `GET /events/{slug}/status` - Check processing status
+
+### Testing
+```bash
+cd backend && python3 test_api.py
+```
+
+## 🚨 Troubleshooting
+
+### Events not loading
+- Ensure backend is running on port 8000
+- Check API connection: `curl http://localhost:8000/`
+
+### Processing fails  
+- Verify Reddit API credentials
+- Check GEMINI_API_KEY is valid
+- Monitor backend logs for errors
+
+### No comments found
+- Try different keywords
+- Check subreddit relevance  
+- Verify date ranges for older events
+
+## 📈 Performance
+
+- **Small event**: 50 comments, 1-2 minutes
+- **Medium event**: 200 comments, 3-5 minutes  
+- **Large event**: 500+ comments, 5-10 minutes
+
+## 🔧 Tech Stack
+
+- **Backend**: FastAPI, SQLite, PRAW (Reddit API), Gemini AI
+- **Frontend**: React, Vite, Vanilla CSS
+- **Deployment**: Self-hosted with simple start script
+
+---
+
+**🎉 Start exploring Amazon sale sentiment with AI-powered insights!**
+
+Visit: http://localhost:3000 after running `./start.sh`

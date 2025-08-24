@@ -11,58 +11,37 @@ async function handleResponse(response) {
   return data.success ? data.data : data;
 }
 
-// Get all sale events
-export async function fetchSaleEvents() {
-  const response = await fetch(`${API_BASE}/sale-events`);
+// Get all sale events with processing status
+export async function fetchEvents() {
+  const response = await fetch(`${API_BASE}/events`);
   return handleResponse(response);
 }
 
-// Get all subreddits
-export async function fetchSubreddits() {
-  const response = await fetch(`${API_BASE}/subreddits`);
+// Get detailed data for a specific event
+export async function fetchEventData(eventSlug) {
+  const response = await fetch(`${API_BASE}/events/${eventSlug}`);
   return handleResponse(response);
 }
 
-// Get comments with optional keyword filtering
-export async function fetchComments(limit = 100, offset = 0, keywords = null) {
-  let url = `${API_BASE}/comments?limit=${limit}&offset=${offset}`;
-  if (keywords) {
-    url += `&keywords=${encodeURIComponent(keywords)}`;
-  }
-  const response = await fetch(url);
-  return handleResponse(response);
-}
-
-// Get sentiment summary
-export async function fetchSentiment() {
-  const response = await fetch(`${API_BASE}/sentiment`);
-  return handleResponse(response);
-}
-
-// Scrape Reddit data
-export async function scrapeRedditData(keywords = null, maxPosts = 50, subreddits = null) {
-  const response = await fetch(`${API_BASE}/scrape`, {
+// Process an event (scrape + analyze + insights)
+export async function processEvent(eventSlug, keywords = null, maxPosts = 50, forceRefresh = false) {
+  const response = await fetch(`${API_BASE}/events/${eventSlug}/process`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ 
+      event_slug: eventSlug,
       keywords: keywords,
-      max_posts: maxPosts, 
-      subreddits: subreddits 
+      max_posts: maxPosts,
+      force_refresh: forceRefresh
     }),
   });
   return handleResponse(response);
 }
 
-// Generate insights
-export async function generateInsights(maxComments = 100) {
-  const response = await fetch(`${API_BASE}/insights`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ max_comments: maxComments }),
-  });
+// Get processing status for an event
+export async function fetchEventStatus(eventSlug) {
+  const response = await fetch(`${API_BASE}/events/${eventSlug}/status`);
   return handleResponse(response);
 }

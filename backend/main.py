@@ -1,48 +1,41 @@
 import os
 import uvicorn
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
-from dotenv import load_dotenv
-from openai import OpenAI
+import logging
 
 from lib.utils import (
-    init_database, get_sale_events, get_subreddits, RedditScraper,
-    generate_keywords, get_comments, add_comments, get_sentiment_summary
+    init_database, get_sale_events, get_event_status, get_event_data,
+    RedditScraper, analyze_sentiment_batch, generate_insights,
+    save_comments, save_insights, update_event_status, DATABASE_PATH
 )
 
-load_dotenv()
-
-# Initialize OpenAI client for Gemini (optional for insights)
-client = None
-if os.getenv("GEMINI_API_KEY"):
-    client = OpenAI(
-        api_key=os.getenv("GEMINI_API_KEY"),
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-    )
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Pydantic models
-class ScrapeRequest(BaseModel):
+class ProcessEventRequest(BaseModel):
+    event_slug: str
     keywords: Optional[List[str]] = None
     max_posts: Optional[int] = 50
-    subreddits: Optional[List[str]] = None
-
-class InsightRequest(BaseModel):
-    max_comments: Optional[int] = 100
+    force_refresh: Optional[bool] = False
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     init_database()
+    logger.info("Database initialized")
     yield
     # Shutdown (if needed)
 
 # Initialize FastAPI app
 app = FastAPI(
     title="Amazon Sale AI Dashboard",
-    description="Simple API for Amazon sale sentiment analysis",
+    description="AI-powered sentiment analysis for Amazon sale events",
     version="2.0.0",
     lifespan=lifespan
 )
@@ -63,172 +56,205 @@ def root():
     """Health check endpoint"""
     return {"message": "Amazon Sale AI Dashboard API v2.0 is running!"}
 
-@app.get("/sale-events")
-def list_sale_events():
-    """Get all predefined sale events"""
+@app.get("/events")
+def list_events():
+    """Get all sale events with their processing status"""
     try:
-        events = get_sale_events()
-        return {"success": True, "data": events}
+        events_data = get_event_status()
+        return {"success": True, "data": events_data["events"]}
     except Exception as e:
+        logger.error(f"Error fetching events: {e}")
         raise HTTPException(status_code=500, detail=f"Error fetching events: {str(e)}")
 
-@app.get("/subreddits")
-def list_subreddits():
-    """Get all configured subreddits"""
+@app.get("/events/{event_slug}")
+def get_event_details(event_slug: str):
+    """Get detailed data for a specific event"""
     try:
-        subreddits = get_subreddits()
-        return {"success": True, "data": subreddits}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching subreddits: {str(e)}")
-
-@app.get("/comments")
-def get_all_comments(limit: int = 100, offset: int = 0, keywords: Optional[str] = None):
-    """Get comments from database with optional keyword filtering"""
-    try:
-        keyword_list = None
-        if keywords:
-            keyword_list = [k.strip() for k in keywords.split(",") if k.strip()]
+        event_data = get_event_data(event_slug)
         
-        comments_data = get_comments(limit, offset, keyword_list)
-        return {"success": True, "data": comments_data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching comments: {str(e)}")
-
-@app.get("/sentiment")
-def get_sentiment():
-    """Get sentiment analysis summary"""
-    try:
-        sentiment_data = get_sentiment_summary()
-        return {"success": True, "data": sentiment_data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching sentiment: {str(e)}")
-
-@app.post("/scrape")
-def scrape_reddit_data(request: ScrapeRequest, background_tasks: BackgroundTasks):
-    """Scrape Reddit data based on keywords"""
-    try:
-        # Use provided keywords or generate from query
-        keywords = request.keywords
-        if not keywords:
-            keywords = generate_keywords("prime day")  # Default keywords
+        if not event_data:
+            raise HTTPException(status_code=404, detail="Event not found")
         
-        # Add scraping task to background
-        background_tasks.add_task(
-            scrape_reddit_task, 
-            keywords,
-            request.subreddits or get_subreddits(),
-            request.max_posts
-        )
-        
-        return {"success": True, "message": "Scraping started in background", "keywords": keywords}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error starting scrape: {str(e)}")
-
-@app.get("/scrape/status")
-def get_scrape_status():
-    """Get current database status"""
-    try:
-        comments_data = get_comments(1, 0)
-        return {
-            "success": True, 
-            "data": {
-                "total_comments": comments_data["total"],
-                "last_updated": "recent" if comments_data["total"] > 0 else "never"
-            }
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting status: {str(e)}")
-
-@app.post("/insights")
-def generate_insights(request: InsightRequest):
-    """Generate AI insights from comments"""
-    try:
-        # Get comments for analysis
-        comments_data = get_comments(request.max_comments, 0)
-        if comments_data["total"] == 0:
-            raise HTTPException(status_code=400, detail="No comments available for analysis")
-        
-        # Prepare comments for AI analysis
-        comments_text = "\n".join([
-            f"- {comment['comment']}" 
-            for comment in comments_data["rows"] 
-            if comment["comment"]
-        ][:50])  # Limit to first 50 comments
-        
-        if not comments_text.strip():
-            raise HTTPException(status_code=400, detail="No valid comments found for analysis")
-        
-        if not client:
-            return {
-                "success": True, 
-                "data": {
-                    "insights": "AI insights unavailable. Please configure GEMINI_API_KEY in environment variables."
-                }
-            }
-        
-        # Create prompt for Gemini
-        prompt = f"""
-Analyze these Amazon sale-related Reddit comments and provide:
-
-1) **Sentiment Distribution**: Overall sentiment (Positive/Negative/Neutral) with percentages
-2) **Top 5 Pain Points**: Main customer complaints with actionable recommendations
-3) **Top 5 Delights**: What customers loved most
-4) **Key Recommendations**: Top 3 improvements for Amazon sales
-
-Keep the response concise and actionable.
-
-Comments:
-{comments_text}
-"""
-        
-        try:
-            response = client.chat.completions.create(
-                model="gemini-2.0-flash",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.3
-            )
-            insights = response.choices[0].message.content.strip()
-        except Exception:
-            insights = "Failed to generate AI insights. Please check API configuration."
-        
-        return {"success": True, "data": {"insights": insights}}
-    
+        return {"success": True, "data": event_data}
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating insights: {str(e)}")
+        logger.error(f"Error fetching event data: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching event data: {str(e)}")
 
-# Helper functions
-
-def scrape_reddit_task(keywords: List[str], subreddits: List[str], max_posts: int):
-    """Background task to scrape Reddit data"""
+@app.post("/events/{event_slug}/scrape-comments")
+def scrape_comments(event_slug: str, request: ProcessEventRequest):
+    """Scrape comments for an event"""
     try:
-        print(f"Starting scrape task - Keywords: {keywords}, Subreddits: {len(subreddits)}, Max posts: {max_posts}")
+        # Check if event exists
+        events = get_sale_events()
+        event = next((e for e in events if e['slug'] == event_slug), None)
+        if not event:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        logger.info(f"Scraping comments for event: {event_slug}")
+        
+        # Step 1: Scrape comments
         scraper = RedditScraper()
-        
-        if scraper.test_connection():
-            print(f"✓ Reddit API connected. Scraping for keywords: {keywords}")
-            comments = scraper.scrape_posts_by_keywords(keywords, subreddits, max_posts)
-            print(f"✓ Scraping completed. Found {len(comments)} comments")
-        else:
-            print("✗ Reddit API not available, cannot scrape data")
-            return
-        
-        if comments:
-            add_comments(comments)
-            print(f"✓ Added {len(comments)} comments to database successfully")
+        if not scraper.test_connection():
+            raise HTTPException(status_code=500, detail="Reddit API connection failed")
             
-            # Verify data was saved
-            from lib.utils import get_comments
-            total_in_db = get_comments(1, 0)["total"]
-            print(f"✓ Database now contains {total_in_db} total comments")
-        else:
-            print("⚠ No comments found for the given keywords")
-            
+        comments = scraper.scrape_event_data(
+            event_slug, 
+            request.keywords or ["amazon sale", "amazon deals", "amazon discount"],
+            request.max_posts or 50
+        )
+        
+        if not comments:
+            raise HTTPException(status_code=404, detail="No comments found")
+        
+        # Step 2: Save comments (without sentiment analysis)
+        for comment in comments:
+            comment['sentiment'] = ''
+            comment['sentiment_score'] = 0.0
+        
+        saved_count = save_comments(comments, event_slug)
+        
+        # Step 3: Update event status
+        update_event_status(
+            event_slug,
+            comments_count=saved_count,
+            is_processed=True
+        )
+        
+        return {
+            "success": True,
+            "message": f"Successfully scraped {saved_count} comments",
+            "data": {
+                "comments_count": saved_count
+            }
+        }
+        
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"✗ Error in scraping task: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Error scraping comments for event {event_slug}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/events/{event_slug}/analyze-sentiment")
+def analyze_event_sentiment(event_slug: str):
+    """Analyze sentiment for scraped comments"""
+    try:
+        # Check if event exists
+        events = get_sale_events()
+        event = next((e for e in events if e['slug'] == event_slug), None)
+        if not event:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        logger.info(f"Analyzing sentiment for event: {event_slug}")
+        
+        # Get existing comments from database
+        import sqlite3
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT id, comment FROM comments 
+            WHERE event_slug = ? AND (sentiment IS NULL OR sentiment = '')
+        """, (event_slug,))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        if not rows:
+            raise HTTPException(status_code=404, detail="No comments found to analyze")
+        
+        # Analyze sentiment for comments
+        comments_data = [{'id': row[0], 'comment': row[1]} for row in rows]
+        analyzed_comments = analyze_sentiment_batch(comments_data)
+        
+        # Update comments in database
+        updated_count = 0
+        for comment in analyzed_comments:
+            try:
+                conn = sqlite3.connect(DATABASE_PATH)
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE comments 
+                    SET sentiment = ?, sentiment_score = ?
+                    WHERE id = ?
+                """, (comment['sentiment'], comment['sentiment_score'], comment['id']))
+                conn.commit()
+                conn.close()
+                updated_count += 1
+            except Exception as e:
+                logger.error(f"Error updating comment {comment['id']}: {e}")
+                continue
+        
+        # Update event status
+        update_event_status(event_slug, sentiment_analyzed=True)
+        
+        return {
+            "success": True,
+            "message": f"Successfully analyzed sentiment for {updated_count} comments",
+            "data": {
+                "analyzed_count": updated_count
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error analyzing sentiment for event {event_slug}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/events/{event_slug}/generate-insights")
+def generate_event_insights(event_slug: str):
+    """Generate AI insights for an event"""
+    try:
+        # Check if event exists
+        events = get_sale_events()
+        event = next((e for e in events if e['slug'] == event_slug), None)
+        if not event:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        logger.info(f"Generating insights for event: {event_slug}")
+        
+        # Generate insights
+        insights = generate_insights(event_slug)
+        if not insights or "unavailable" in insights.lower():
+            raise HTTPException(status_code=500, detail="Failed to generate insights")
+        
+        # Save insights
+        save_insights(event_slug, insights)
+        
+        # Update event status
+        update_event_status(event_slug, insights_generated=True)
+        
+        return {
+            "success": True,
+            "message": "Successfully generated AI insights",
+            "data": {
+                "insights": insights
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating insights for event {event_slug}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/events/{event_slug}/status")
+def get_processing_status(event_slug: str):
+    """Get processing status for an event"""
+    try:
+        status = get_event_status(event_slug)
+        
+        if not status:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        return {"success": True, "data": status}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching status: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching status: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

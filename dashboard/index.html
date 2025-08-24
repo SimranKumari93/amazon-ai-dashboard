@@ -4,7 +4,31 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <title>Amazon Sale AI Dashboard - Clean Version</title>
+    <style>
+      /* Grid responsive helper classes */
+      .responsive-grid {
+        display: grid;
+      }
+      
+      .responsive-flex {
+        display: flex;
+      }
+      
+      @media (max-width: 768px) {
+        .responsive-grid {
+          grid-template-columns: 1fr !important;
+        }
+        
+        .responsive-flex {
+          flex-direction: column !important;
+        }
+        
+        .hide-mobile {
+          display: none !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
