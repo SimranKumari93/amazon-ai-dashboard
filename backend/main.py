@@ -1,4 +1,5 @@
-import os, json, uvicorn
+import os, json
+import  uvicorn
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -139,4 +140,4 @@ Keep it concise and bullet-based. Comments:\n{joined}
     return {"slug": req.slug, "summary": text}
 
 if __name__ == "__main__":
-   uvicorn.run(app, host="0.0.0.0", port=8000)
+   uvicorn.run("main:app", host="0.0.0.0", port=8000)
